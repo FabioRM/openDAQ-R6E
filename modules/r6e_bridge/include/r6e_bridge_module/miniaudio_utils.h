@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include <audio_device_module/common.h>
+#include <r6e_bridge_module/common.h>
 
 #if defined(__clang__)
     #pragma clang diagnostic push

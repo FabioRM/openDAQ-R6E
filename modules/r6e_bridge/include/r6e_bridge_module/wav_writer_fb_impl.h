@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include <audio_device_module/common.h>
+#include <r6e_bridge_module/common.h>
 #include <opendaq/function_block_impl.h>
 #include <opendaq/function_block_type_factory.h>
 #include <opendaq/input_port_config_ptr.h>

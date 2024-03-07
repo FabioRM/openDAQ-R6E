@@ -1,4 +1,4 @@
-#include <audio_device_module/wav_writer_fb_impl.h>
+#include <r6e_bridge_module/wav_writer_fb_impl.h>
 #include <opendaq/event_packet_ids.h>
 #include <opendaq/event_packet_ptr.h>
 #include <opendaq/data_descriptor_ptr.h>
@@ -19,7 +19,7 @@ WAVWriterFbImpl::WAVWriterFbImpl(const ContextPtr& ctx, const ComponentPtr& pare
 FunctionBlockTypePtr WAVWriterFbImpl::CreateType()
 {
     return FunctionBlockType(
-        "audio_device_module_wav_writer",
+        "r6e_bridge_module_wav_writer",
         "WAVWriter",
         "Writes WAV files"
     );

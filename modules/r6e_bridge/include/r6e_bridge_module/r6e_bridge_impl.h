@@ -15,8 +15,8 @@
  */
 
 #pragma once
-#include <audio_device_module/common.h>
-#include <audio_device_module/miniaudio_utils.h>
+#include <r6e_bridge_module/common.h>
+#include <r6e_bridge_module/miniaudio_utils.h>
 #include <opendaq/channel_ptr.h>
 #include <opendaq/device_impl.h>
 #include <miniaudio/miniaudio.h>

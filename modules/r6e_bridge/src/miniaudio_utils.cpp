@@ -2,7 +2,7 @@
 #define MA_NO_NODE_GRAPH
 #define MA_NO_RESOURCE_MANAGER
 #define MINIAUDIO_IMPLEMENTATION
-#include <audio_device_module/miniaudio_utils.h>
+#include <r6e_bridge_module/miniaudio_utils.h>
 
 BEGIN_NAMESPACE_R6E_BRIDGE_MODULE
 
