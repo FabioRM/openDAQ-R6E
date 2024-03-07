@@ -34,6 +34,11 @@ if (APP_ENABLE_AUDIO_APP AND NOT DAQMODULES_AUDIO_DEVICE_MODULE)
     set(DAQMODULES_AUDIO_DEVICE_MODULE ON CACHE BOOL "" FORCE)
 endif()
 
+if (APP_ENABLE_R6E_APP AND NOT DAQMODULES_R6E_BRIDGE_MODULE)
+    message(NOTICE "R6E application requires DAQMODULES_R6E_BRIDGE_MODULE. Force enabling setting.")
+    set(DAQMODULES_R6E_BRIDGE_MODULE ON CACHE BOOL "" FORCE)
+endif()
+
 if (DAQSIMULATOR_ENABLE_SIMULATOR_APP AND NOT DAQMODULES_REF_DEVICE_MODULE)
     message(NOTICE "Simulator application requires DAQMODULES_REF_DEVICE_MODULE. Force enabling setting.")
     set(DAQMODULES_REF_DEVICE_MODULE ON CACHE BOOL "" FORCE)
@@ -122,6 +127,11 @@ endif()
 if (DAQMODULES_AUDIO_DEVICE_MODULE)
     message(STATUS "Audio device module")
     add_subdirectory(audio_device_module)
+endif()
+
+if (DAQMODULES_R6E_BRIDGE_DEVICE_MODULE)
+    message(STATUS "R6E bridge module")
+    add_subdirectory(r6e_bridge_module)
 endif()
 
 if (OPENDAQ_ENABLE_TESTS)
