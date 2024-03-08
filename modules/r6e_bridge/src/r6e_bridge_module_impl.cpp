@@ -17,7 +17,7 @@ R6eBridgeModule::R6eBridgeModule(const ContextPtr& context)
     : Module("Audio device module",
             daq::VersionInfo(R6E_BRIDGE_MODULE_MAJOR_VERSION, R6E_BRIDGE_MODULE_MINOR_VERSION, R6E_BRIDGE_MODULE_PATCH_VERSION),
             context,
-            "AudioDevice")
+            "R6eBridge")
     , maContext(std::make_shared<MiniaudioContext>())
     , deviceIndex(0)
 {
@@ -45,7 +45,7 @@ ListPtr<IDeviceInfo> R6eBridgeModule::onGetAvailableDevices()
     auto availableDevices = List<IDeviceInfo>();
     for (size_t i = 0; i < captureDeviceCount; i++)
     {
-        auto info = AudioDeviceImpl::CreateDeviceInfo(maContext, pCaptureDeviceInfos[i]);
+        auto info = R6eBridgeImpl::CreateDeviceInfo(maContext, pCaptureDeviceInfos[i]);
         availableDevices.pushBack(info);
     }
 
@@ -60,7 +60,7 @@ DictPtr<IString, IDeviceType> R6eBridgeModule::onGetAvailableDeviceTypes()
 {
     auto result = Dict<IString, IDeviceType>();
 
-    auto deviceType = AudioDeviceImpl::createType();
+    auto deviceType = R6eBridgeImpl::createType();
     result.set(deviceType.getId(), deviceType);
 
     return result;
@@ -70,13 +70,13 @@ DevicePtr R6eBridgeModule::onCreateDevice(const StringPtr& connectionString,
                                             const ComponentPtr& parent,
                                             const PropertyObjectPtr& /*config*/)
 {
-    auto id = AudioDeviceImpl::getIdFromConnectionString(connectionString);
+    auto id = R6eBridgeImpl::getIdFromConnectionString(connectionString);
 
     std::scoped_lock lock(sync);
 
     std::string localId = fmt::format("miniaudiodev{}", deviceIndex++);
 
-    auto devicePtr = createWithImplementation<IDevice, AudioDeviceImpl>(maContext, id, context, parent, StringPtr(localId));
+    auto devicePtr = createWithImplementation<IDevice, R6eBridgeImpl>(maContext, id, context, parent, StringPtr(localId));
     return devicePtr;
 }
 

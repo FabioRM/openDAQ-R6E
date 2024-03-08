@@ -11,14 +11,14 @@
 
 BEGIN_NAMESPACE_R6E_BRIDGE_MODULE
 
-AudioDeviceImpl::AudioDeviceImpl(const std::shared_ptr<MiniaudioContext>& maContext, const ma_device_id& id, const ContextPtr& ctx, const ComponentPtr& parent, const StringPtr& localId)
+R6eBridgeImpl::R6eBridgeImpl(const std::shared_ptr<MiniaudioContext>& maContext, const ma_device_id& id, const ContextPtr& ctx, const ComponentPtr& parent, const StringPtr& localId)
     : GenericDevice<>(ctx, parent, localId)
     , maId(id)
     , maContext(maContext)
     , started(false)
     , logger(ctx.getLogger())
     , loggerComponent( this->logger.assigned()
-                          ? this->logger.getOrAddComponent("AudioDevice")
+                          ? this->logger.getOrAddComponent("R6eBridge")
                           : throw ArgumentNullException("Logger must not be null"))
 {
     // time signal is owned by device, because in case of multiple channels they should share the same time signal
@@ -30,12 +30,12 @@ AudioDeviceImpl::AudioDeviceImpl(const std::shared_ptr<MiniaudioContext>& maCont
     start();
 }
 
-AudioDeviceImpl::~AudioDeviceImpl()
+R6eBridgeImpl::~R6eBridgeImpl()
 {
     stop();
 }
 
-DeviceInfoPtr AudioDeviceImpl::CreateDeviceInfo(const std::shared_ptr<MiniaudioContext>& maContext, const ma_device_info& deviceInfo)
+DeviceInfoPtr R6eBridgeImpl::CreateDeviceInfo(const std::shared_ptr<MiniaudioContext>& maContext, const ma_device_info& deviceInfo)
 {
     auto devInfo = DeviceInfo(getConnectionStringFromId(maContext->getPtr()->backend, deviceInfo.id));
     devInfo.setName(deviceInfo.name);
@@ -44,7 +44,7 @@ DeviceInfoPtr AudioDeviceImpl::CreateDeviceInfo(const std::shared_ptr<MiniaudioC
     return devInfo;
 }
 
-DeviceInfoPtr AudioDeviceImpl::onGetInfo()
+DeviceInfoPtr R6eBridgeImpl::onGetInfo()
 {
     ma_result result;
     ma_device_info info;
@@ -56,7 +56,7 @@ DeviceInfoPtr AudioDeviceImpl::onGetInfo()
     return CreateDeviceInfo(maContext, info);
 }
 
-RatioPtr AudioDeviceImpl::onGetResolution()
+RatioPtr R6eBridgeImpl::onGetResolution()
 {
     if (started)
         return Ratio(1, maDevice.sampleRate);
@@ -64,24 +64,24 @@ RatioPtr AudioDeviceImpl::onGetResolution()
     return Ratio(0, 1);
 }
 
-uint64_t AudioDeviceImpl::onGetTicksSinceOrigin()
+uint64_t R6eBridgeImpl::onGetTicksSinceOrigin()
 {
     return 0;
 }
 
-std::string AudioDeviceImpl::onGetOrigin()
+std::string R6eBridgeImpl::onGetOrigin()
 {
     return "";
 }
 
-UnitPtr AudioDeviceImpl::onGetDomainUnit()
+UnitPtr R6eBridgeImpl::onGetDomainUnit()
 {
     auto unitPtr = daq::UnitBuilder().setName("second").setSymbol("s").setQuantity("time").build();
 
     return unitPtr;
 }
 
-void AudioDeviceImpl::initProperties()
+void R6eBridgeImpl::initProperties()
 {
     auto sampleRatePropInfo = IntPropertyBuilder("SampleRate", 44100).setSuggestedValues(List<Int>(11025, 22050, 44100)).build();
     objPtr.addProperty(sampleRatePropInfo);
@@ -93,11 +93,11 @@ void AudioDeviceImpl::initProperties()
 
 static void miniaudioDataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
 {
-    auto this_ = static_cast<AudioDeviceImpl*>(pDevice->pUserData);
+    auto this_ = static_cast<R6eBridgeImpl*>(pDevice->pUserData);
     this_->addData(pInput, frameCount);
 }
 
-void AudioDeviceImpl::addData(const void* data, size_t sampleCount)
+void R6eBridgeImpl::addData(const void* data, size_t sampleCount)
 {
     try
     {
@@ -112,7 +112,7 @@ void AudioDeviceImpl::addData(const void* data, size_t sampleCount)
     }
 }
 
-void AudioDeviceImpl::start()
+void R6eBridgeImpl::start()
 {
     if (started || disposeCalled)
         return;
@@ -146,7 +146,7 @@ void AudioDeviceImpl::start()
     started = true;
 }
 
-void AudioDeviceImpl::stop()
+void R6eBridgeImpl::stop()
 {
     if (!started)
         return;
@@ -156,18 +156,18 @@ void AudioDeviceImpl::stop()
     started = false;
 }
 
-void AudioDeviceImpl::readProperties()
+void R6eBridgeImpl::readProperties()
 {
     sampleRate = objPtr.getPropertyValue("SampleRate");
     LOG_I("Properties: SampleRate {}", sampleRate);
 }
 
-void AudioDeviceImpl::createAudioChannel()
+void R6eBridgeImpl::createAudioChannel()
 {
     channel = createAndAddChannel<AudioChannelImpl>(ioFolder, "audio");
 }
 
-void AudioDeviceImpl::propertyChanged()
+void R6eBridgeImpl::propertyChanged()
 {
     std::scoped_lock lock(sync);
 
@@ -178,7 +178,7 @@ void AudioDeviceImpl::propertyChanged()
     start();
 }
 
-void AudioDeviceImpl::configureTimeSignal()
+void R6eBridgeImpl::configureTimeSignal()
 {
     auto dataDescriptor = DataDescriptorBuilder()
                               .setSampleType(SampleType::Int64)
@@ -191,13 +191,13 @@ void AudioDeviceImpl::configureTimeSignal()
     timeSignal.setDescriptor(dataDescriptor);
 }
 
-void AudioDeviceImpl::configure()
+void R6eBridgeImpl::configure()
 {
     channel.asPtr<IAudioChannel>()->configure(maDevice, timeSignal);
     configureTimeSignal();
 }
 
-std::string AudioDeviceImpl::getConnectionStringFromId(ma_backend backend, ma_device_id id)
+std::string R6eBridgeImpl::getConnectionStringFromId(ma_backend backend, ma_device_id id)
 {
     std::string connStr = "miniaudio://";
     switch (backend)
@@ -268,12 +268,12 @@ std::string AudioDeviceImpl::getConnectionStringFromId(ma_backend backend, ma_de
     return connStr;
 }
 
-DeviceTypePtr AudioDeviceImpl::createType()
+DeviceTypePtr R6eBridgeImpl::createType()
 {
     return DeviceType("miniaudio", "Audio device", "");
 }
 
-ma_device_id AudioDeviceImpl::getIdFromConnectionString(std::string connectionString)
+ma_device_id R6eBridgeImpl::getIdFromConnectionString(std::string connectionString)
 {
     std::string prefix = "miniaudio://";
     auto found = connectionString.find(prefix);

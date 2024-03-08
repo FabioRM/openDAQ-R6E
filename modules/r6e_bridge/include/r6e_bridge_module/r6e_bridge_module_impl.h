@@ -22,10 +22,10 @@
 
 BEGIN_NAMESPACE_R6E_BRIDGE_MODULE
 
-class AudioDeviceModule final : public Module
+class R6eBridgeModule final : public Module
 {
 public:
-    explicit AudioDeviceModule(const ContextPtr& context);
+    explicit R6eBridgeModule(const ContextPtr& context);
 
     ListPtr<IDeviceInfo> onGetAvailableDevices() override;
     DictPtr<IString, IDeviceType> onGetAvailableDeviceTypes() override;
